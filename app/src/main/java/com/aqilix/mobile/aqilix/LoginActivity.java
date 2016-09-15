@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.aqilix.mobile.aqilix.database.PairDataTable;
+import com.aqilix.mobile.aqilix.library.GetTask;
+import com.aqilix.mobile.aqilix.model.PairDataModel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,8 +26,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -91,26 +96,50 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void successLogin(JSONObject values) {
-        Boolean isSuccess = false;
+    private void dismissProgress() {
         if (progress.isShowing()) {
             progress.dismiss();
         }
+    }
+
+    public void successLogin(JSONObject values) {
         try {
-            isSuccess = values.getBoolean("success");
+            Boolean isSuccess = values.getBoolean("success");
+            if (isSuccess) {
+                String token = values.getString("access_token");
+
+                String url = getString(R.string.host) + "/api/me";
+                String auth = "Bearer " + token;
+                GetTask task = new GetTask(url);
+                task.setHeader("Content-Type", "application/vnd.aqilix.bootstrap.v1+json")
+                        .setHeader("Accept", "application/json")
+                        .setHeader("Authorization", auth);
+                task.execute();
+                JSONObject getResult = task.get();
+
+                if (getResult.getBoolean("success")) {
+                    PairDataTable pair = new PairDataTable(getApplication());
+                    pair.insert("uuid", getResult.getString("uuid"));
+                    dismissProgress();
+                    Intent dashboard = new Intent(getApplication(), DashboardActivity.class);
+                    dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    dashboard.putExtra("content", values.toString());
+                    startActivity(dashboard);
+                    finish();
+                }
+                else {
+                    dismissProgress();
+                    Toast.makeText(getApplication(), "User is null", Toast.LENGTH_LONG).show();
+                }
+            }
+            else {
+                dismissProgress();
+                Toast.makeText(getApplication(), "Login failed", Toast.LENGTH_LONG).show();
+            }
         }
-        catch (JSONException e) {
+        catch (JSONException | InterruptedException | ExecutionException e) {
+            dismissProgress();
             e.printStackTrace();
-        }
-        if (isSuccess) {
-            Intent dashboard = new Intent(getApplication(), DashboardActivity.class);
-            dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            dashboard.putExtra("content", values.toString());
-            startActivity(dashboard);
-            finish();
-        }
-        else {
-            Toast.makeText(getApplication(), "Login failed", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -171,6 +200,20 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     reader.close();
                     result = new JSONObject(builder.toString());
+
+                    Iterator<String> keys = result.keys();
+                    List<PairDataModel> listModel = new ArrayList<>();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        String value = result.getString(key);
+                        PairDataModel model = new PairDataModel(key, value);
+                        listModel.add(model);
+                    }
+                    if (listModel.size() > 0) {
+                        PairDataTable table = new PairDataTable(getApplication());
+                        table.bulkInsert(listModel);
+                    }
+
                     result.put("success", true);
                 }
             }
@@ -191,7 +234,6 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
-            Log.i("responseServer", jsonObject.toString());
             successLogin(jsonObject);
         }
     }

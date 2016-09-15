@@ -11,6 +11,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.aqilix.mobile.aqilix.database.PairDataTable;
+import com.aqilix.mobile.aqilix.library.GetTask;
+import com.aqilix.mobile.aqilix.model.PairDataModel;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,8 +26,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -89,16 +95,47 @@ public class SignupActivity extends AppCompatActivity {
         sign.execute();
     }
 
-    private void successRegister(Boolean success) {
+    private void dismissProgress() {
         if (progress.isShowing()) {
             progress.dismiss();
         }
-        if (success) {
-            Toast.makeText(getApplication(), "Register success", Toast.LENGTH_LONG).show();
-            goToLogin();
+    }
+
+    private void successRegister(JSONObject json) {
+        try {
+            Boolean success = json.getBoolean("success");
+            if (success) {
+                String token = json.getString("access_token");
+
+                String url = getString(R.string.host) + "/api/me";
+                String auth = "Bearer " + token;
+                GetTask task = new GetTask(url);
+                task.setHeader("Content-Type", "application/vnd.aqilix.bootstrap.v1+json")
+                        .setHeader("Accept", "application/json")
+                        .setHeader("Authorization", auth);
+                task.execute();
+                JSONObject getResult = task.get();
+
+                dismissProgress();
+                if (getResult.getBoolean("success")) {
+                    Intent dashboard = new Intent(getApplication(), DashboardActivity.class);
+                    dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    dashboard.putExtra("content", json.toString());
+                    startActivity(dashboard);
+                    finish();
+                }
+                else {
+                    Toast.makeText(getApplication(), "User is null", Toast.LENGTH_LONG).show();
+                }
+            }
+            else {
+                dismissProgress();
+                Toast.makeText(getApplication(), "Register failed", Toast.LENGTH_LONG).show();
+            }
         }
-        else {
-            Toast.makeText(getApplication(), "Register failed", Toast.LENGTH_LONG).show();
+        catch (JSONException | ExecutionException | InterruptedException e) {
+            dismissProgress();
+            e.printStackTrace();
         }
     }
 
@@ -159,6 +196,20 @@ public class SignupActivity extends AppCompatActivity {
                     }
                     reader.close();
                     result = new JSONObject(builder.toString());
+
+                    Iterator<String> keys = result.keys();
+                    List<PairDataModel> listModel = new ArrayList<>();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        String value = result.getString(key);
+                        PairDataModel model = new PairDataModel(key, value);
+                        listModel.add(model);
+                    }
+                    if (listModel.size() > 0) {
+                        PairDataTable table = new PairDataTable(getApplication());
+                        table.bulkInsert(listModel);
+                    }
+
                     result.put("success", true);
                 }
             }
@@ -179,13 +230,8 @@ public class SignupActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
-            try {
-                Boolean success = jsonObject.getBoolean("success");
-                successRegister(success);
-            }
-            catch (JSONException e) {
-                e.printStackTrace();
-            }
+            successRegister(jsonObject);
+
         }
     }
 }
