@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -116,8 +117,10 @@ public class SignupActivity extends AppCompatActivity {
                 task.execute();
                 JSONObject getResult = task.get();
 
-                dismissProgress();
                 if (getResult.getBoolean("success")) {
+                    PairDataTable pair = new PairDataTable(getApplication());
+                    pair.insert("uuid", getResult.getString("uuid"));
+                    dismissProgress();
                     Intent dashboard = new Intent(getApplication(), DashboardActivity.class);
                     dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     dashboard.putExtra("content", json.toString());
@@ -125,12 +128,14 @@ public class SignupActivity extends AppCompatActivity {
                     finish();
                 }
                 else {
-                    Toast.makeText(getApplication(), "User is null", Toast.LENGTH_LONG).show();
+                    dismissProgress();
+                    Toast.makeText(getApplication(), getResult.getString("detail"), Toast.LENGTH_LONG).show();
                 }
             }
             else {
                 dismissProgress();
-                Toast.makeText(getApplication(), "Register failed", Toast.LENGTH_LONG).show();
+                String message = "Register failed, " + json.getString("detail");
+                Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
             }
         }
         catch (JSONException | ExecutionException | InterruptedException e) {
@@ -187,16 +192,17 @@ public class SignupActivity extends AppCompatActivity {
                 stream.flush();
                 stream.close();
 
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    StringBuilder builder = new StringBuilder();
-                    String temp;
-                    while ((temp = reader.readLine()) != null) {
-                        builder.append(temp);
-                    }
-                    reader.close();
-                    result = new JSONObject(builder.toString());
+                InputStream iStream = connection.getResponseCode() == HttpURLConnection.HTTP_OK ? connection.getInputStream() : connection.getErrorStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
+                StringBuilder builder = new StringBuilder();
+                String temp;
+                while ((temp = reader.readLine()) != null) {
+                    builder.append(temp);
+                }
+                reader.close();
+                result = new JSONObject(builder.toString());
 
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Iterator<String> keys = result.keys();
                     List<PairDataModel> listModel = new ArrayList<>();
                     while (keys.hasNext()) {
@@ -209,9 +215,8 @@ public class SignupActivity extends AppCompatActivity {
                         PairDataTable table = new PairDataTable(getApplication());
                         table.bulkInsert(listModel);
                     }
-
-                    result.put("success", true);
                 }
+                result.put("success", connection.getResponseCode() == HttpURLConnection.HTTP_OK);
             }
             catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -231,7 +236,6 @@ public class SignupActivity extends AppCompatActivity {
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
             successRegister(jsonObject);
-
         }
     }
 }

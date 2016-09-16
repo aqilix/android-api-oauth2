@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -41,19 +42,17 @@ public class GetTask extends AsyncTask<Void, Long, JSONObject> {
     protected JSONObject doInBackground(Void... voids) {
         JSONObject result = new JSONObject();
         try {
-            result.put("success", false);
             connection.connect();
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder builder = new StringBuilder();
-                String temp;
-                while ((temp = reader.readLine()) != null) {
-                    builder.append(temp);
-                }
-                reader.close();
-                result = new JSONObject(builder.toString());
-                result.put("success", true);
+            InputStream inputStream = connection.getResponseCode() == HttpURLConnection.HTTP_OK ? connection.getInputStream() : connection.getErrorStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder builder = new StringBuilder();
+            String temp;
+            while ((temp = reader.readLine()) != null) {
+                builder.append(temp);
             }
+            reader.close();
+            result = new JSONObject(builder.toString());
+            result.put("success", connection.getResponseCode() == HttpURLConnection.HTTP_OK);
         }
         catch (IOException | JSONException e) {
             e.printStackTrace();

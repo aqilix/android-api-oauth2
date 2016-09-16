@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -129,12 +130,13 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 else {
                     dismissProgress();
-                    Toast.makeText(getApplication(), "User is null", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplication(), getResult.getString("detail"), Toast.LENGTH_LONG).show();
                 }
             }
             else {
                 dismissProgress();
-                Toast.makeText(getApplication(), "Login failed", Toast.LENGTH_LONG).show();
+                String message = "Login failed, " + values.getString("detail");
+                Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
             }
         }
         catch (JSONException | InterruptedException | ExecutionException e) {
@@ -190,17 +192,17 @@ public class LoginActivity extends AppCompatActivity {
                 stream.flush();
                 stream.close();
 
-                result.put("success", false);
-                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    StringBuilder builder = new StringBuilder();
-                    String temp;
-                    while ((temp = reader.readLine()) != null) {
-                        builder.append(temp);
-                    }
-                    reader.close();
-                    result = new JSONObject(builder.toString());
+                InputStream iStream = connection.getResponseCode() == HttpURLConnection.HTTP_OK ? connection.getInputStream() : connection.getErrorStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
+                StringBuilder builder = new StringBuilder();
+                String temp;
+                while ((temp = reader.readLine()) != null) {
+                    builder.append(temp);
+                }
+                reader.close();
+                result = new JSONObject(builder.toString());
 
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     Iterator<String> keys = result.keys();
                     List<PairDataModel> listModel = new ArrayList<>();
                     while (keys.hasNext()) {
@@ -213,9 +215,8 @@ public class LoginActivity extends AppCompatActivity {
                         PairDataTable table = new PairDataTable(getApplication());
                         table.bulkInsert(listModel);
                     }
-
-                    result.put("success", true);
                 }
+                result.put("success", connection.getResponseCode() == HttpURLConnection.HTTP_OK);
             }
             catch (IOException | JSONException e) {
                 e.printStackTrace();
