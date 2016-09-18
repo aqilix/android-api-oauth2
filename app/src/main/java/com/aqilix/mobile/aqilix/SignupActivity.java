@@ -212,6 +212,8 @@ public class SignupActivity extends AppCompatActivity {
                         listModel.add(model);
                     }
                     if (listModel.size() > 0) {
+                        PairDataModel timeModel = new PairDataModel("insert_time", String.valueOf(System.currentTimeMillis()));
+                        listModel.add(timeModel);
                         PairDataTable table = new PairDataTable(getApplication());
                         table.bulkInsert(listModel);
                     }

@@ -8,10 +8,13 @@ import org.json.JSONObject;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,6 +37,19 @@ public class PostTask extends AsyncTask<Void, Long, JSONObject> {
         catch (IOException e) {
             e.printStackTrace();
         }
+        body = new ArrayList<>();
+    }
+
+    public PostTask setRequestMethod(String method) {
+        if (method != null) {
+            try {
+                connection.setRequestMethod(method);
+            }
+            catch (ProtocolException e) {
+                e.printStackTrace();
+            }
+        }
+        return this;
     }
 
     public PostTask setHeader(String type, String value) {
@@ -57,7 +73,6 @@ public class PostTask extends AsyncTask<Void, Long, JSONObject> {
     protected JSONObject doInBackground(Void... voids) {
         JSONObject result = new JSONObject();
         try {
-            result.put("success", false);
             connection.connect();
             OutputStream stream = new BufferedOutputStream(connection.getOutputStream());
             for (String strBody : body) {
@@ -66,18 +81,16 @@ public class PostTask extends AsyncTask<Void, Long, JSONObject> {
             stream.flush();
             stream.close();
 
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder builder = new StringBuilder();
-                String temp;
-                while ((temp = reader.readLine()) != null) {
-                    builder.append(temp);
-                }
-                reader.close();
-                result = new JSONObject(builder.toString());
-
-                result.put("success", true);
+            InputStream iStream = (connection.getResponseCode() == HttpURLConnection.HTTP_OK) ? connection.getInputStream() : connection.getErrorStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
+            StringBuilder builder = new StringBuilder();
+            String temp;
+            while ((temp = reader.readLine()) != null) {
+                builder.append(temp);
             }
+            reader.close();
+            result = new JSONObject(builder.toString());
+            result.put("success", (connection.getResponseCode() == HttpURLConnection.HTTP_OK));
         }
         catch (IOException | JSONException e) {
             e.printStackTrace();

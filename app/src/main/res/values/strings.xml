@@ -8,10 +8,25 @@
     <string name="sample_password">Your password</string>
     <string name="submit">Submit</string>
     <string name="login">Login</string>
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
     <string name="already_account">Already have an account?</string>
     <string name="havent_account">Didn\'t have an account?</string>
 
     <string name="my_profile">My Profile</string>
     <string name="client_id">testclient</string>
     <string name="client_secret">123456</string>
+
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="name">Name</string>
+    <string name="dob">Date Of Birth</string>
+    <string name="address">Address</string>
+    <string name="city">City</string>
+    <string name="province">Province</string>
+    <string name="postal_code">Postal Code</string>
+    <string name="country">Country</string>
+    <string name="user">User</string>
+    <string name="profile_desc">User Profile Image</string>
+    <string name="pick_date">Pick</string>
 </resources>

@@ -1,11 +1,11 @@
 package com.aqilix.mobile.aqilix;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aqilix.mobile.aqilix.database.PairDataTable;
 
@@ -53,7 +53,8 @@ public class DashboardActivity extends AppCompatActivity {
     private void showMyProfile() {
         String uuid = pairTable.getValueOfKey("uuid");
         if (uuid != null) {
-            Toast.makeText(getApplication(), uuid, Toast.LENGTH_LONG).show();
+            Intent profile = new Intent(getApplication(), ProfileActivity.class);
+            startActivity(profile);
         }
     }
 }
