@@ -44,6 +44,7 @@ public class SignupActivity extends AppCompatActivity {
         progress.setMessage("Loading...");
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
+        isLogin();
 
         final EditText email = (EditText) findViewById(R.id.editEmail);
         final EditText password = (EditText) findViewById(R.id.editPassword);
@@ -72,11 +73,27 @@ public class SignupActivity extends AppCompatActivity {
         });
     }
 
+    private void isLogin() {
+        PairDataTable pair = new PairDataTable(getApplication());
+        String uuid = pair.getValueOfKey("uuid");
+        if (uuid != null && !uuid.equals("")) {
+            goToDashboard(uuid);
+        }
+    }
+
     private void goToLogin() {
         Intent login = new Intent(getApplication(), LoginActivity.class);
         login.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(login);
         overridePendingTransition(0, 0);
+        finish();
+    }
+
+    private void goToDashboard(String uuid) {
+        Intent dashboard = new Intent(getApplication(), DashboardActivity.class);
+        dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        dashboard.putExtra("content", uuid);
+        startActivity(dashboard);
         finish();
     }
 
@@ -121,11 +138,7 @@ public class SignupActivity extends AppCompatActivity {
                     PairDataTable pair = new PairDataTable(getApplication());
                     pair.insert("uuid", getResult.getString("uuid"));
                     dismissProgress();
-                    Intent dashboard = new Intent(getApplication(), DashboardActivity.class);
-                    dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    dashboard.putExtra("content", json.toString());
-                    startActivity(dashboard);
-                    finish();
+                    goToDashboard(json.toString());
                 }
                 else {
                     dismissProgress();

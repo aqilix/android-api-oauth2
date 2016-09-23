@@ -12,6 +12,7 @@
     <string name="save">Save</string>
     <string name="already_account">Already have an account?</string>
     <string name="havent_account">Didn\'t have an account?</string>
+    <string name="logout">Logout</string>
 
     <string name="my_profile">My Profile</string>
     <string name="client_id">testclient</string>

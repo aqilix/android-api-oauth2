@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 
 import com.aqilix.mobile.aqilix.model.PairDataModel;
 
@@ -107,5 +106,17 @@ public class PairDataTable extends DatabaseHelper {
         String where = PairData.COL_KEY + " = ?";
         String[] args = { key };
         return fetchRow(where, args, null, null, null, null).getValue();
+    }
+
+    public void deletePairData(String key) {
+        String where = PairData.COL_KEY + " = ?";
+        String[] args = { key };
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(PairData.TABLE_NAME, where, args);
+    }
+
+    public void deleteAllPairData() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(PairData.TABLE_NAME, null, null);
     }
 }

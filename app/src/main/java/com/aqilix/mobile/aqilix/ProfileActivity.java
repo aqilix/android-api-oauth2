@@ -2,16 +2,19 @@ package com.aqilix.mobile.aqilix;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aqilix.mobile.aqilix.database.PairDataTable;
 import com.aqilix.mobile.aqilix.database.UserProfileTable;
+import com.aqilix.mobile.aqilix.library.DownloadTask;
 import com.aqilix.mobile.aqilix.library.GetTask;
 import com.aqilix.mobile.aqilix.library.MainFunction;
 import com.aqilix.mobile.aqilix.model.UserProfileModel;
@@ -19,6 +22,7 @@ import com.aqilix.mobile.aqilix.model.UserProfileModel;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -28,6 +32,7 @@ public class ProfileActivity extends AppCompatActivity {
     public UserProfileTable profileTable;
     public static String uuid;
     public SwipeRefreshLayout refreshLayout;
+    public File photoUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +49,7 @@ public class ProfileActivity extends AppCompatActivity {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (refreshLayout.isRefreshing()) {
-                    refreshLayout.setRefreshing(false);
-                }
+                syncProfile();
             }
         });
         Button editBtn = (Button) findViewById(R.id.btnEditProfile);
@@ -114,7 +117,15 @@ public class ProfileActivity extends AppCompatActivity {
             String postal = profile.getString("postalCode");
             String country = profile.getString("country");
             String user = profile.getString("user");
-            UserProfileModel model = new UserProfileModel(uuid, fName, lName, longDOB, addr, city, prov, postal, country, user);
+            String photo = profile.getString("photo");
+            UserProfileModel model = new UserProfileModel(uuid, fName, lName, longDOB, addr, city, prov, postal, country, user, photo);
+            if (photo != null && !photo.equals("")) {
+                File dir = getExternalFilesDir(null);
+                String filename = uuid + ".jpg";
+                DownloadTask download = new DownloadTask(photo, dir.getAbsolutePath(), filename);
+                download.execute();
+            }
+
             if (profileTable.insert(model)) {
                 updateUI(model);
             }
@@ -147,8 +158,19 @@ public class ProfileActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.profileCountry)).setText(country);
         String user = (profileModel.getUser() != null) ? profileModel.getUser() : "- No Data Available -";
         ((TextView) findViewById(R.id.profileEmail)).setText(user);
+        if (profileModel.getPhoto() != null && !profileModel.getPhoto().equals("")) {
+            String path = getExternalFilesDir(null).getAbsolutePath() + "/" + uuid + ".jpg";
+            File foto = new File(path);
+            if (foto.exists()) {
+                Bitmap img = MainFunction.decodeFileToBitmap(foto, 150, 150);
+                ((ImageView) findViewById(R.id.profilePicture)).setImageBitmap(img);
+            }
+        }
         if (progress.isShowing()) {
             progress.dismiss();
+        }
+        if (refreshLayout.isRefreshing()) {
+            refreshLayout.setRefreshing(false);
         }
     }
 }

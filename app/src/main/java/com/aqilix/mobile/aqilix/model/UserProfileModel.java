@@ -18,12 +18,13 @@ public class UserProfileModel {
     protected String postalCode;
     protected String country;
     protected String user;
+    protected String photo;
 
     public UserProfileModel() {
     }
 
     public UserProfileModel(String UUID, String firstName, String lastName, Long dateOfBirth, String address,
-                            String city, String province, String postalCode, String country, String user) {
+                            String city, String province, String postalCode, String country, String user, String photo) {
         setUuid(UUID);
         setFirstName(firstName);
         setLastName(lastName);
@@ -34,6 +35,7 @@ public class UserProfileModel {
         setPostalCode(postalCode);
         setCountry(country);
         setUser(user);
+        setPhoto(photo);
     }
 
     public void setUuid(String uuid) {
@@ -74,6 +76,10 @@ public class UserProfileModel {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public String getUuid() {
@@ -124,5 +130,9 @@ public class UserProfileModel {
 
     public String getUser() {
         return user;
+    }
+
+    public String getPhoto() {
+        return photo;
     }
 }

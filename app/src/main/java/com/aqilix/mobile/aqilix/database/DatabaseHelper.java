@@ -25,6 +25,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + PairData.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + UserProfile.TABLE_NAME);
+        onCreate(sqLiteDatabase);
     }
 
     public static final class PairData implements BaseColumns {
@@ -48,6 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public static final String COL_POSTAL_CODE = "postalCode";
         public static final String COL_COUNTRY = "country";
         public static final String COL_USER = "user";
+        public static final String COL_PHOTO = "photo";
         public static final String CREATE_QUERY = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
                 COL_UUID + " VARCHAR NOT NULL PRIMARY KEY, " +
                 COL_FIRST_NAME + " VARCHAR, " +
@@ -58,6 +62,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COL_PROVINCE + " VARCHAR, " +
                 COL_POSTAL_CODE + " VARCHAR, " +
                 COL_COUNTRY + " VARCHAR, " +
-                COL_USER + " VARCHAR)";
+                COL_USER + " VARCHAR, " +
+                COL_PHOTO + " TEXT)";
     }
 }

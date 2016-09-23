@@ -1,17 +1,24 @@
 package com.aqilix.mobile.aqilix.library;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.aqilix.mobile.aqilix.R;
 import com.aqilix.mobile.aqilix.database.PairDataTable;
+import com.aqilix.mobile.aqilix.database.UserProfileTable;
 import com.aqilix.mobile.aqilix.model.PairDataModel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +26,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -35,8 +43,7 @@ public class MainFunction {
         PairDataTable pairTable = new PairDataTable(context);
         Long insertTime = Long.valueOf(pairTable.getValueOfKey("insert_time"));
         Long now = System.currentTimeMillis();
-        // Long expiresIn = Long.valueOf(pairTable.getValueOfKey("expires_in"));
-        Long expiresIn = 300L;
+        Long expiresIn = Long.valueOf(pairTable.getValueOfKey("expires_in"));
         Long duration = (now - insertTime) / 1000;
         String token = null;
         if (duration < expiresIn) {
@@ -82,7 +89,6 @@ public class MainFunction {
                 }
             }
         }
-        Log.i("token", token);
         return token;
     }
 
@@ -104,5 +110,81 @@ public class MainFunction {
         ConnectivityManager manager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = manager.getActiveNetworkInfo();
         return (info != null && info.isConnected());
+    }
+
+    public static String createRandomString(Integer len) {
+        Random rand = new Random();
+        String characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        String unique = "";
+        for (Integer i = 0; i <= len; i++) {
+            unique += characters.charAt(rand.nextInt(characters.length()));
+        }
+        return unique;
+    }
+
+    public static Bitmap decodeFileToBitmap(File file, int reqWidth, int reqHeight) {
+        if (file == null || !file.exists()) return null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        Integer angle = 0;
+        try {
+            ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+            String orient = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            Integer exifOrient = orient != null ? Integer.valueOf(orient) : ExifInterface.ORIENTATION_NORMAL;
+            switch (exifOrient) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    angle = 90;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    angle = 180;
+                    break;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    angle = 270;
+                    break;
+                default:
+                    angle = 0;
+                    break;
+            }
+        }
+        catch (IOException ie) {
+            ie.printStackTrace();
+        }
+
+        Matrix matrix = new Matrix();
+        matrix.setRotate(angle);
+        final int oHeight = options.outHeight;
+        final int oWidth = options.outWidth;
+        Integer inSampleSize = 1;
+        if (oHeight > reqHeight || oWidth > reqWidth) {
+            Integer hFactor = oHeight / reqHeight;
+            Integer wFactor = oWidth / reqWidth;
+            inSampleSize = Math.max(hFactor, wFactor);
+        }
+
+        options.inSampleSize = inSampleSize;
+        options.inJustDecodeBounds = false;
+        Bitmap decoded = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        Bitmap result = Bitmap.createBitmap(decoded, 0, 0, decoded.getWidth(), decoded.getHeight(), matrix, true);
+        if (result.getByteCount() > 2000000) {
+            int newHeight = reqHeight / 2;
+            int newWidth = reqWidth / 2;
+            result = decodeFileToBitmap(file, newWidth, newHeight);
+        }
+        return result;
+    }
+
+    public static String getMimeType(String path) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(path);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getExtensionFromMimeType(extension);
+        }
+        return type;
+    }
+
+    public static void clearAll(Context context) {
+        new PairDataTable(context).deleteAllPairData();
+        new UserProfileTable(context).deleteAllUser();
     }
 }

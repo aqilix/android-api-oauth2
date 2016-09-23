@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -23,8 +27,7 @@
         </activity>
         <activity android:name=".LoginActivity" />
         <activity android:name=".DashboardActivity" />
-        <activity
-            android:name=".ProfileActivity"
+        <activity android:name=".ProfileActivity"
             android:parentActivityName=".DashboardActivity" />
         <activity android:name=".EditProfileActivity"
             android:parentActivityName=".ProfileActivity"/>

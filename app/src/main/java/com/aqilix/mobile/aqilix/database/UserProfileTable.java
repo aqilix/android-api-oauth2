@@ -17,7 +17,7 @@ public class UserProfileTable extends DatabaseHelper {
 
     private String[] columns = { UserProfile.COL_UUID, UserProfile.COL_FIRST_NAME, UserProfile.COL_LAST_NAME, UserProfile.COL_DOB,
             UserProfile.COL_ADDRESS, UserProfile.COL_CITY, UserProfile.COL_PROVINCE, UserProfile.COL_POSTAL_CODE, UserProfile.COL_COUNTRY,
-            UserProfile.COL_USER };
+            UserProfile.COL_USER, UserProfile.COL_PHOTO };
 
     public UserProfileTable(Context context) {
         super(context);
@@ -39,6 +39,7 @@ public class UserProfileTable extends DatabaseHelper {
             model.setPostalCode(cursor.getString(cursor.getColumnIndex(UserProfile.COL_POSTAL_CODE)));
             model.setCountry(cursor.getString(cursor.getColumnIndex(UserProfile.COL_COUNTRY)));
             model.setUser(cursor.getString(cursor.getColumnIndex(UserProfile.COL_USER)));
+            model.setPhoto(cursor.getString(cursor.getColumnIndex(UserProfile.COL_PHOTO)));
         }
         cursor.close();
         return model;
@@ -61,7 +62,8 @@ public class UserProfileTable extends DatabaseHelper {
                 String postalCode = cursor.getString(cursor.getColumnIndex(UserProfile.COL_POSTAL_CODE));
                 String country = cursor.getString(cursor.getColumnIndex(UserProfile.COL_COUNTRY));
                 String user = cursor.getString(cursor.getColumnIndex(UserProfile.COL_USER));
-                UserProfileModel model = new UserProfileModel(uuid, firstName, lastName, dob, address, city, province, postalCode, country, user);
+                String photo = cursor.getString(cursor.getColumnIndex(UserProfile.COL_PHOTO));
+                UserProfileModel model = new UserProfileModel(uuid, firstName, lastName, dob, address, city, province, postalCode, country, user, photo);
                 result.add(model);
                 cursor.moveToNext();
             }
@@ -88,9 +90,10 @@ public class UserProfileTable extends DatabaseHelper {
         values.put(UserProfile.COL_POSTAL_CODE, model.getPostalCode());
         values.put(UserProfile.COL_COUNTRY, model.getCountry());
         values.put(UserProfile.COL_USER, model.getUser());
+        values.put(UserProfile.COL_PHOTO, model.getPhoto());
 
         UserProfileModel exists = getRowByUUID(model.getUuid());
-        Boolean result = false;
+        Boolean result;
         if (exists.getUuid() != null && !exists.getUuid().equals("")) {
             String where = UserProfile.COL_UUID + " = ?";
             String args[] = { model.getUuid() };
@@ -101,5 +104,17 @@ public class UserProfileTable extends DatabaseHelper {
             result = (db.insert(UserProfile.TABLE_NAME, null, values) > -1);
         }
         return result;
+    }
+
+    public void deleteUserByUUID(String uuid) {
+        String where = UserProfile.COL_UUID + " = ?";
+        String[] args = { uuid };
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(UserProfile.TABLE_NAME, where, args);
+    }
+
+    public void deleteAllUser() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(UserProfile.TABLE_NAME, null, null);
     }
 }
