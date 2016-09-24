@@ -266,7 +266,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 FormDataTask formData = new FormDataTask(url);
                 formData.setHeader("Accept", "application/json")
                         .setHeader("Authorization", auth)
-                        .setRequestMethod("PATCH")
+                        .setRequestMethod("PUT")
                         .setBody("firstName", profile.getFirstName())
                         .setBody("lastName", profile.getLastName())
                         .setBody("dateOfBirth", profile.getStringDateOfBirth("yyyy-MM-dd"))
@@ -296,6 +296,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 }
             }
             catch (ExecutionException | InterruptedException | JSONException e) {
+                dismissProgress();
                 e.printStackTrace();
             }
         }
