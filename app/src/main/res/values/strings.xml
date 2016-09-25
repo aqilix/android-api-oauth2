@@ -30,4 +30,6 @@
     <string name="user">User</string>
     <string name="profile_desc">User Profile Image</string>
     <string name="pick_date">Pick</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="logo_description">Logo Description</string>
 </resources>

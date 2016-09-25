@@ -14,33 +14,26 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/textHeader"
-            android:gravity="center"
-            android:textSize="30sp"
-            android:textAllCaps="true"
-            android:layout_marginBottom="10dp"
-            android:text="@string/app_name" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/textPage"
-            android:gravity="center"
-            android:textSize="20sp"
-            android:textAllCaps="true"
-            android:layout_marginBottom="50dp"
-            android:layout_below="@id/textHeader"
-            android:text="@string/login" />
+            android:gravity="center">
+            <ImageView
+                android:contentDescription="@string/logo_description"
+                android:layout_width="200dp"
+                android:layout_height="100dp"
+                android:src="@drawable/aqilix_bright_256_80" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/textEmail"
-            android:textSize="20sp"
-            android:layout_below="@id/textPage"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif"
+            android:layout_below="@id/textHeader"
             android:gravity="center"
             android:text="@string/email"
             android:focusable="true"
@@ -51,6 +44,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/editTextEmail"
             android:gravity="center"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-condensed"
             android:hint="@string/sample_email"
             android:layout_below="@id/textEmail"
             android:inputType="textEmailAddress"
@@ -62,8 +57,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
             android:id="@+id/textPassword"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"
             android:gravity="center"
-            android:textSize="18sp"
             android:layout_below="@id/editTextEmail"
             android:text="@string/password"/>
 
@@ -71,6 +68,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/editTextPassword"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-condensed"
             android:gravity="center"
             android:hint="@string/sample_password"
             android:layout_below="@id/textPassword"
@@ -82,6 +81,8 @@
             android:layout_marginTop="15dp"
             android:id="@+id/btnLogin"
             android:text="@string/login"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif"
             android:layout_below="@id/editTextPassword"
             android:gravity="center"/>
 
@@ -91,11 +92,13 @@
             android:layout_below="@id/btnLogin"
             android:layout_marginTop="10dp"
             android:orientation="horizontal"
+            android:id="@+id/signupRow"
             android:gravity="center">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/havent_account"
+                android:textSize="20sp"
                 android:paddingRight="5dp"
                 android:paddingEnd="5dp"
                 android:gravity="center"/>
@@ -103,8 +106,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/signUpText"
-                android:textColor="@android:color/holo_red_dark"
+                android:textSize="20sp"
+                android:textColor="@android:color/holo_blue_dark"
                 android:text="@string/signup"/>
         </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/resetPassword"
+            android:textSize="20sp"
+            android:text="@string/reset_password"
+            android:layout_below="@id/signupRow"
+            android:gravity="center"
+            android:textColor="@android:color/holo_blue_dark"
+            android:paddingTop="5dp" />
     </RelativeLayout>
 </ScrollView>

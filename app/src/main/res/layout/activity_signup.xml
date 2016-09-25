@@ -14,21 +14,25 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/textHeader"
-            android:gravity="center"
-            android:textSize="20sp"
-            android:textAllCaps="true"
-            android:layout_marginBottom="50dp"
-            android:text="@string/app_name"/>
+            android:gravity="center">
+            <ImageView
+                android:contentDescription="@string/logo_description"
+                android:layout_width="200dp"
+                android:layout_height="100dp"
+                android:src="@drawable/aqilix_bright_256_80" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/textEmail"
-            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif"
             android:layout_below="@id/textHeader"
             android:gravity="center"
             android:text="@string/email"
@@ -39,6 +43,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/editEmail"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-condensed"
             android:gravity="center"
             android:hint="@string/sample_email"
             android:layout_below="@id/textEmail"
@@ -51,8 +57,10 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
             android:id="@+id/textPassword"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"
             android:gravity="center"
-            android:textSize="18sp"
             android:layout_below="@id/editEmail"
             android:text="@string/password"/>
 
@@ -61,6 +69,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/editPassword"
             android:gravity="center"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif-condensed"
             android:hint="@string/sample_password"
             android:layout_below="@id/textPassword"
             android:inputType="textPassword"/>
@@ -71,6 +81,8 @@
             android:layout_marginTop="15dp"
             android:id="@+id/btnSignup"
             android:text="@string/signup"
+            android:textSize="22sp"
+            android:fontFamily="sans-serif"
             android:layout_below="@id/editPassword"
             android:gravity="center"/>
 
@@ -85,6 +97,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/already_account"
+                android:textSize="20sp"
                 android:paddingRight="5dp"
                 android:paddingEnd="5dp"
                 android:gravity="center"/>
@@ -92,8 +105,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/loginText"
-                android:textColor="@android:color/holo_red_dark"
-                android:text="@string/login"/>
+                android:textColor="@android:color/holo_blue_dark"
+                android:text="@string/login"
+                android:textSize="20sp"/>
         </LinearLayout>
     </RelativeLayout>
 </ScrollView>
