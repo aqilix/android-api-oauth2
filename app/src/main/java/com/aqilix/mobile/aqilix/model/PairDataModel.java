@@ -7,12 +7,13 @@ public class PairDataModel {
     protected String key;
     protected String value;
 
-    public PairDataModel() {
-    }
-
     public PairDataModel(String key, String value) {
         setKey(key);
         setValue(value);
+    }
+
+    public PairDataModel() {
+
     }
 
     public void setKey(String key) {

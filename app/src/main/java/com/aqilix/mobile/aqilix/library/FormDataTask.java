@@ -1,6 +1,7 @@
 package com.aqilix.mobile.aqilix.library;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -129,6 +130,7 @@ public class FormDataTask extends AsyncTask<Void, Long, JSONObject> {
                 builder.append(temp);
             }
             reader.close();
+            Log.i("hasilServer", builder.toString());
             result = new JSONObject(builder.toString());
             result.put("success", (connection.getResponseCode() == HttpURLConnection.HTTP_OK));
         }

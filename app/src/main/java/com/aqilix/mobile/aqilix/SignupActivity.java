@@ -216,6 +216,7 @@ public class SignupActivity extends AppCompatActivity {
                 result = new JSONObject(builder.toString());
 
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    // Write to SQLite pair data
                     Iterator<String> keys = result.keys();
                     List<PairDataModel> listModel = new ArrayList<>();
                     while (keys.hasNext()) {

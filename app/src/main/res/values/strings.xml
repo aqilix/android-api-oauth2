@@ -16,7 +16,7 @@
 
     <string name="my_profile">My Profile</string>
     <string name="client_id">testclient</string>
-    <string name="client_secret">123456</string>
+    <string name="client_secret">client1234</string>
 
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
@@ -31,5 +31,6 @@
     <string name="profile_desc">User Profile Image</string>
     <string name="pick_date">Pick</string>
     <string name="reset_password">Reset Password</string>
+    <string name="reset">Reset</string>
     <string name="logo_description">Logo Description</string>
 </resources>

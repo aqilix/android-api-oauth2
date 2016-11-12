@@ -2,6 +2,7 @@ package com.aqilix.mobile.aqilix;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -46,7 +47,16 @@ public class LoginActivity extends AppCompatActivity {
 
         final EditText email = (EditText) findViewById(R.id.editTextEmail);
         final EditText password = (EditText) findViewById(R.id.editTextPassword);
+        TextView reset = (TextView)findViewById(R.id.resetPassword);
         Button loginBtn = (Button) findViewById(R.id.btnLogin);
+        reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent reset = new Intent(getApplication(),ResetActivity.class);
+                reset.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(reset);
+            }
+        });
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
