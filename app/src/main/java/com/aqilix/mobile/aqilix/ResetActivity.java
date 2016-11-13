@@ -42,12 +42,12 @@ public class ResetActivity extends AppCompatActivity {
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
 
-        final TextView mail = (TextView)findViewById(R.id.editTextEmail);
+        final TextView email = (TextView) findViewById(R.id.editTextEmail);
         Button reset = (Button)findViewById(R.id.btnReset);
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String strMail = mail.getText().toString();
+                String strMail = email.getText().toString();
                 doReset(strMail);
             }
         });
@@ -76,43 +76,21 @@ public class ResetActivity extends AppCompatActivity {
         }
     }
 
-    public void successLogin(JSONObject values) {
+    public void successReset(JSONObject values) {
         try {
             Boolean isSuccess = values.getBoolean("success");
             if (isSuccess) {
-                String token = values.getString("access_token");
-
-                String url = getString(R.string.host) + "/api/me";
-                String auth = "Bearer " + token;
-                GetTask task = new GetTask(url);
-                task.setHeader("Content-Type", "application/vnd.aqilix.bootstrap.v1+json")
-                        .setHeader("Accept", "application/json")
-                        .setHeader("Authorization", auth);
-                task.execute();
-                JSONObject getResult = task.get();
-
-                if (getResult.getBoolean("success")) {
-                    PairDataTable pair = new PairDataTable(getApplication());
-                    pair.insert("uuid", getResult.getString("uuid"));
-                    dismissProgress();
-                    Intent dashboard = new Intent(getApplication(), LoginActivity.class);
-                    dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    dashboard.putExtra("content", values.toString());
-                    startActivity(dashboard);
-                    finish();
-                }
-                else {
-                    dismissProgress();
-                    Toast.makeText(getApplication(), getResult.getString("detail"), Toast.LENGTH_LONG).show();
-                }
+                dismissProgress();
+                String message = "Reset Password success";
+                Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
             }
             else {
                 dismissProgress();
-                String message = "Login failed, " + values.getString("detail");
+                String message = "Reset Password failed, " + values.getString("detail");
                 Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
             }
         }
-        catch (JSONException | InterruptedException | ExecutionException e) {
+        catch (JSONException e) {
             dismissProgress();
             e.printStackTrace();
         }
@@ -168,26 +146,15 @@ public class ResetActivity extends AppCompatActivity {
                 while ((temp = reader.readLine()) != null) {
                     builder.append(temp);
                 }
-                reader.close();
-                result = new JSONObject(builder.toString());
 
+                reader.close();
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    Iterator<String> keys = result.keys();
-                    List<PairDataModel> listModel = new ArrayList<>();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        String value = result.getString(key);
-                        PairDataModel model = new PairDataModel(key, value);
-                        listModel.add(model);
-                    }
-                    if (listModel.size() > 0) {
-                        PairDataModel timeModel = new PairDataModel("insert_time", String.valueOf(System.currentTimeMillis()));
-                        listModel.add(timeModel);
-                        PairDataTable table = new PairDataTable(getApplication());
-                        table.bulkInsert(listModel);
-                    }
+                    result = new JSONObject("{}");
+                    result.put("success", true);
+                } else {
+                    result = new JSONObject(builder.toString());
+                    result.put("success", false);
                 }
-                result.put("success", connection.getResponseCode() == HttpURLConnection.HTTP_OK);
             }
             catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -206,7 +173,7 @@ public class ResetActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
-            successLogin(jsonObject);
+            successReset(jsonObject);
         }
     }
 }
