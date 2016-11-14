@@ -102,11 +102,6 @@ public class PostTask extends AsyncTask<Void, Long, JSONObject> {
     }
 
     @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
-
-    @Override
     protected void onPostExecute(JSONObject jsonObject) {
         super.onPostExecute(jsonObject);
     }

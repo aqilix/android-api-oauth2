@@ -99,7 +99,9 @@
                 android:layout_height="wrap_content"
                 android:text="@string/havent_account"
                 android:textSize="20sp"
+                android:paddingStart="0dp"
                 android:paddingRight="5dp"
+                android:paddingLeft="0dp"
                 android:paddingEnd="5dp"
                 android:gravity="center"/>
             <TextView

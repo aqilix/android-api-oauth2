@@ -32,7 +32,6 @@ public class ProfileActivity extends AppCompatActivity {
     public UserProfileTable profileTable;
     public static String uuid;
     public SwipeRefreshLayout refreshLayout;
-    public File photoUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

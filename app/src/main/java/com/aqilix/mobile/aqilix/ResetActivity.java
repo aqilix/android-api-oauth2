@@ -1,7 +1,6 @@
 package com.aqilix.mobile.aqilix;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,14 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.aqilix.mobile.aqilix.database.PairDataTable;
-import com.aqilix.mobile.aqilix.library.GetTask;
-import com.aqilix.mobile.aqilix.model.PairDataModel;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -26,9 +19,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class ResetActivity extends AppCompatActivity {
 
@@ -164,11 +155,6 @@ public class ResetActivity extends AppCompatActivity {
                 connection.disconnect();
             }
             return result;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
         }
 
         @Override

@@ -100,6 +100,8 @@
                 android:text="@string/already_account"
                 android:textSize="20sp"
                 android:paddingRight="5dp"
+                android:paddingLeft="0dp"
+                android:paddingStart="0dp"
                 android:paddingEnd="5dp"
                 android:gravity="center"/>
             <TextView

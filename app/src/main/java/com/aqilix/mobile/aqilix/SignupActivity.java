@@ -182,7 +182,7 @@ public class SignupActivity extends AppCompatActivity {
             return this;
         }
 
-        public void setConnectTimOut(Integer timeout) {
+        public void setConnectTimeOut(Integer timeout) {
             connection.setConnectTimeout(timeout);
         }
 
@@ -241,11 +241,6 @@ public class SignupActivity extends AppCompatActivity {
                 connection.disconnect();
             }
             return result;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
         }
 
         @Override
