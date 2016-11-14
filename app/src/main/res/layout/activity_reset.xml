@@ -62,40 +62,5 @@
             android:fontFamily="sans-serif"
             android:layout_below="@id/editTextEmail"
             android:gravity="center"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/btnReset"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:id="@+id/signupRow"
-            android:gravity="center">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/havent_account"
-                android:textSize="20sp"
-                android:paddingRight="5dp"
-                android:paddingEnd="5dp"
-                android:gravity="center"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/signUpText"
-                android:textSize="20sp"
-                android:textColor="@android:color/holo_blue_dark"
-                android:text="@string/signup"/>
-        </LinearLayout>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/resetPassword"
-            android:textSize="20sp"
-            android:text="@string/reset_password"
-            android:layout_below="@id/signupRow"
-            android:gravity="center"
-            android:textColor="@android:color/holo_blue_dark"
-            android:paddingTop="5dp" />
     </RelativeLayout>
 </ScrollView>
