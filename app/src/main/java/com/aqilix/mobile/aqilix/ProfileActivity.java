@@ -42,7 +42,7 @@ public class ProfileActivity extends AppCompatActivity {
         profileTable = new UserProfileTable(getApplication());
         uuid = pairTable.getValueOfKey("uuid");
         progress = new ProgressDialog(ProfileActivity.this);
-        progress.setMessage("Loading...");
+        progress.setMessage(getString(R.string.progress_message));
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
         refreshLayout = (SwipeRefreshLayout) findViewById(R.id.profileRefresh);

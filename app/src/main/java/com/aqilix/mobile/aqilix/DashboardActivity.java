@@ -35,7 +35,7 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
         progress = new ProgressDialog(DashboardActivity.this);
-        progress.setMessage("Loading, Please wait..");
+        progress.setMessage(getString(R.string.progress_message));
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
     }

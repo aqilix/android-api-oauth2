@@ -38,7 +38,7 @@ public class ResetActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reset);
         progress = new ProgressDialog(ResetActivity.this);
-        progress.setMessage("Loading, Please wait...");
+        progress.setMessage(getString(R.string.progress_message));
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
 
@@ -47,6 +47,7 @@ public class ResetActivity extends AppCompatActivity {
         reset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progress.show();
                 String strMail = email.getText().toString();
                 doReset(strMail);
             }

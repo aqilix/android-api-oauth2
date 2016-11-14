@@ -41,7 +41,7 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
         progress = new ProgressDialog(SignupActivity.this);
-        progress.setMessage("Loading...");
+        progress.setMessage(getString(R.string.progress_message));
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
         isLogin();

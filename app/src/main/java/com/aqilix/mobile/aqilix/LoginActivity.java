@@ -41,7 +41,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         progress = new ProgressDialog(LoginActivity.this);
-        progress.setMessage("Loading, Please wait...");
+        progress.setMessage(getString(R.string.progress_message));
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
 
