@@ -37,7 +37,9 @@
         <activity
             android:name=".EditProfileActivity"
             android:parentActivityName=".ProfileActivity" />
-        <activity android:name=".ResetActivity"></activity>
+        <activity
+            android:name=".ResetActivity"
+            android:parentActivityName=".LoginActivity" />
     </application>
 
 </manifest>
