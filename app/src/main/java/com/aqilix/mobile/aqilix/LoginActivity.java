@@ -53,7 +53,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent reset = new Intent(getApplication(),ResetActivity.class);
-                reset.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(reset);
             }
         });
