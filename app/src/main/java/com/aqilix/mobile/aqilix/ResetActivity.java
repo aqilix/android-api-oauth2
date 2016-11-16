@@ -1,6 +1,7 @@
 package com.aqilix.mobile.aqilix;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -68,6 +69,11 @@ public class ResetActivity extends AppCompatActivity {
         }
     }
 
+    public void LoginOp(){
+        Intent op = new Intent(getApplication(),LoginActivity.class);
+        startActivity(op);
+    }
+
     public void successReset(JSONObject values) {
         try {
             Boolean isSuccess = values.getBoolean("success");
@@ -75,6 +81,7 @@ public class ResetActivity extends AppCompatActivity {
                 dismissProgress();
                 String message = "Reset Password success";
                 Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
+                LoginOp();
             }
             else {
                 dismissProgress();
