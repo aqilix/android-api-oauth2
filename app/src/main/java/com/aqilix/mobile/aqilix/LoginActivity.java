@@ -2,23 +2,15 @@ package com.aqilix.mobile.aqilix;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.aqilix.mobile.aqilix.database.PairDataTable;
-import com.aqilix.mobile.aqilix.library.GetTask;
-import com.aqilix.mobile.aqilix.model.PairDataModel;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,10 +24,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.aqilix.mobile.aqilix.database.PairDataTable;
+import com.aqilix.mobile.aqilix.library.GetTask;
+import com.aqilix.mobile.aqilix.model.PairDataModel;
 
 public class LoginActivity extends AppCompatActivity {
 
     private ProgressDialog progress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +67,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (progress.isShowing()) {
                         progress.dismiss();
                     }
-                    Toast.makeText(getApplication(), "Login failed, please fill all form", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplication(), "Login failed, please fill username and password", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -86,6 +84,11 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Do Login
+     * @param email
+     * @param password
+     */
     public void doLogin(String email, String password) {
         String url = getString(R.string.host) + "/oauth";
         LoginTask login = new LoginTask(url);
@@ -106,45 +109,84 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Dismiss progress
+     */
     private void dismissProgress() {
         if (progress.isShowing()) {
             progress.dismiss();
         }
     }
 
-    public void successLogin(JSONObject values) {
+    /**
+     * Populate pair data on SQLite
+     *
+     * @param jsonResponse
+     */
+    protected void populatePairData(JSONObject jsonResponse) {
+        Iterator<String> keys = jsonResponse.keys();
+        List<PairDataModel> listModel = new ArrayList<>();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            String value = null;
+            try {
+                value = jsonResponse.getString(key);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            PairDataModel model = new PairDataModel(key, value);
+            listModel.add(model);
+        }
+        if (listModel.size() > 0) {
+            PairDataModel timeModel = new PairDataModel("insert_time", String.valueOf(System.currentTimeMillis()));
+            listModel.add(timeModel);
+            PairDataTable table = new PairDataTable(getApplication());
+            table.bulkInsert(listModel);
+            Log.i("successLogin.pairData", listModel.toString());
+        }
+    }
+
+    /**
+     * Tasks after login success
+     *
+     * @param jsonResponse
+     */
+    public void successLogin(JSONObject jsonResponse) {
         try {
-            Boolean isSuccess = values.getBoolean("success");
+            Boolean isSuccess = jsonResponse.getBoolean("success");
             if (isSuccess) {
-                String token = values.getString("access_token");
-
-                String url = getString(R.string.host) + "/api/me";
-                String auth = "Bearer " + token;
-                GetTask task = new GetTask(url);
-                task.setHeader("Content-Type", "application/vnd.aqilix.bootstrap.v1+json")
+                this.populatePairData(jsonResponse);
+                // retrieve uuid from /api/me
+                String token = jsonResponse.getString("access_token");
+                String url   = getString(R.string.host) + "/api/me";
+                GetTask meResource = new GetTask(url);
+                meResource.setHeader("Content-Type", "application/vnd.aqilix.bootstrap.v1+json")
                         .setHeader("Accept", "application/json")
-                        .setHeader("Authorization", auth);
-                task.execute();
-                JSONObject getResult = task.get();
-
-                if (getResult.getBoolean("success")) {
+                        .setHeader("Authorization", "Bearer " + token);
+                meResource.execute();
+                JSONObject meResourceResponse = meResource.get();
+                Log.i("successLogin.meResource", meResourceResponse.toString());
+                if (meResourceResponse.getBoolean("success")) {
+                    String uuid = meResourceResponse.getString("uuid");
+                    // insert uuid to pair data
                     PairDataTable pair = new PairDataTable(getApplication());
-                    pair.insert("uuid", getResult.getString("uuid"));
+                    pair.insert("uuid", uuid);
+                    Log.i("successLogin.pairData", "uuid: " + uuid);
                     dismissProgress();
+
+                    // go to dashboardActivity
                     Intent dashboard = new Intent(getApplication(), DashboardActivity.class);
                     dashboard.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    dashboard.putExtra("content", values.toString());
+                    dashboard.putExtra("content", uuid);
                     startActivity(dashboard);
                     finish();
-                }
-                else {
+                } else {
                     dismissProgress();
-                    Toast.makeText(getApplication(), getResult.getString("detail"), Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplication(), meResourceResponse.getString("detail"), Toast.LENGTH_LONG).show();
                 }
-            }
-            else {
+            } else {
                 dismissProgress();
-                String message = "Login failed, " + values.getString("detail");
+                String message = "Login failed, " + jsonResponse.getString("detail");
                 Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
             }
         }
@@ -154,13 +196,23 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * LoginTask
+     */
     private class LoginTask extends AsyncTask<Void, Long, JSONObject> {
+
         private HttpURLConnection connection;
+
         private List<String> body;
 
-        public LoginTask(String Url) {
+        /**
+         * Constructor
+         *
+         * @param url
+         */
+        public LoginTask(String url) {
             try {
-                URL post = new URL(Url);
+                URL post = new URL(url);
                 connection = (HttpURLConnection) post.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setDoInput(true);
@@ -172,6 +224,13 @@ public class LoginActivity extends AppCompatActivity {
             body = new ArrayList<>();
         }
 
+        /**
+         * Set Header
+         *
+         * @param type
+         * @param value
+         * @return
+         */
         public LoginTask setHeader(String type, String value) {
             if (connection != null) {
                 connection.setRequestProperty(type, value);
@@ -179,10 +238,20 @@ public class LoginActivity extends AppCompatActivity {
             return this;
         }
 
+        /**
+         * Set Connection TimeOut
+         *
+         * @param timeout
+         */
         public void setConnectTimeOut(Integer timeout) {
             connection.setConnectTimeout(timeout);
         }
 
+        /**
+         * Set Request Body
+         *
+         * @param body
+         */
         public void setBody(String body) {
             if (body != null) {
                 this.body.add(body);
@@ -191,57 +260,53 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected JSONObject doInBackground(Void... voids) {
-            JSONObject result = new JSONObject();
+            JSONObject jsonResponse = new JSONObject();
+
             try {
                 connection.connect();
                 OutputStream stream = new BufferedOutputStream(connection.getOutputStream());
                 for (String strBody : body) {
                     stream.write(strBody.getBytes());
                 }
+
                 stream.flush();
                 stream.close();
+                InputStream iStream = null;
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    iStream = connection.getInputStream();
+                } else {
+                    iStream = connection.getErrorStream();
+                }
 
-                InputStream iStream = connection.getResponseCode() == HttpURLConnection.HTTP_OK ? connection.getInputStream() : connection.getErrorStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(iStream));
                 StringBuilder builder = new StringBuilder();
                 String temp;
                 while ((temp = reader.readLine()) != null) {
                     builder.append(temp);
                 }
-                reader.close();
-                result = new JSONObject(builder.toString());
 
+                reader.close();
+                Log.i("doinbackground.login", builder.toString());
+                jsonResponse = new JSONObject(builder.toString());
                 if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    Iterator<String> keys = result.keys();
-                    List<PairDataModel> listModel = new ArrayList<>();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        String value = result.getString(key);
-                        PairDataModel model = new PairDataModel(key, value);
-                        listModel.add(model);
-                    }
-                    if (listModel.size() > 0) {
-                        PairDataModel timeModel = new PairDataModel("insert_time", String.valueOf(System.currentTimeMillis()));
-                        listModel.add(timeModel);
-                        PairDataTable table = new PairDataTable(getApplication());
-                        table.bulkInsert(listModel);
-                    }
+                    jsonResponse.put("success", true);
+                } else {
+                    jsonResponse.put("success", false);
                 }
-                result.put("success", connection.getResponseCode() == HttpURLConnection.HTTP_OK);
-            }
-            catch (IOException | JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
             finally {
                 connection.disconnect();
             }
-            return result;
+
+            return jsonResponse;
         }
 
         @Override
-        protected void onPostExecute(JSONObject jsonObject) {
-            super.onPostExecute(jsonObject);
-            successLogin(jsonObject);
+        protected void onPostExecute(JSONObject jsonResponse) {
+            super.onPostExecute(jsonResponse);
+            successLogin(jsonResponse);
         }
     }
 }
