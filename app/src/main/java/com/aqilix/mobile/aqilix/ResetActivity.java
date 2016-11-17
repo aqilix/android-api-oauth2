@@ -5,12 +5,11 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import org.json.JSONException;
-import org.json.JSONObject;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,10 +20,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ResetActivity extends AppCompatActivity {
 
     private ProgressDialog progress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +48,11 @@ public class ResetActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Do Reset
+     *
+     * @param mail
+     */
     public void doReset(String mail){
         String url = getString(R.string.host) + "/api/resetpassword/email";
         ResetTask reset = new ResetTask(url);
@@ -63,29 +70,36 @@ public class ResetActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Dismiss Progress
+     */
     private void dismissProgress() {
         if (progress.isShowing()) {
             progress.dismiss();
         }
     }
 
-    public void LoginOp(){
-        Intent op = new Intent(getApplication(),LoginActivity.class);
-        startActivity(op);
-    }
-
-    public void successReset(JSONObject values) {
+    /**
+     * Tasks after reset success
+     *
+     * @param jsonResponse
+     */
+    public void postReset(JSONObject jsonResponse) {
         try {
-            Boolean isSuccess = values.getBoolean("success");
+            Boolean isSuccess = jsonResponse.getBoolean("success");
             if (isSuccess) {
                 dismissProgress();
-                String message = "Reset Password success";
+                String message = "Reset Password Success";
                 Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
-                LoginOp();
+
+                // intent to LoginActivity
+                Intent intent = new Intent(getApplication(),LoginActivity.class);
+                startActivity(intent);
             }
             else {
                 dismissProgress();
-                String message = "Reset Password failed, " + values.getString("detail");
+                // @// TODO: 11/18/16 display validation_messages
+                String message = "Reset Password Failed, " + jsonResponse.getString("detail");
                 Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
             }
         }
@@ -95,13 +109,23 @@ public class ResetActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * ResetTask
+     */
     private class ResetTask extends AsyncTask<Void, Long, JSONObject> {
+
         private HttpURLConnection connection;
+
         private List<String> body;
 
-        public ResetTask(String Url) {
+        /**
+         * Constructor
+         *
+         * @param url
+         */
+        public ResetTask(String url) {
             try {
-                URL post = new URL(Url);
+                URL post = new URL(url);
                 connection = (HttpURLConnection) post.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setDoInput(true);
@@ -113,6 +137,13 @@ public class ResetActivity extends AppCompatActivity {
             body = new ArrayList<>();
         }
 
+        /**
+         * Set Header
+         *
+         * @param type
+         * @param value
+         * @return
+         */
         public ResetTask setHeader(String type, String value) {
             if (connection != null) {
                 connection.setRequestProperty(type, value);
@@ -120,6 +151,11 @@ public class ResetActivity extends AppCompatActivity {
             return this;
         }
 
+        /**
+         * Set Request Body
+         *
+         * @param body
+         */
         public void setBody(String body) {
             if (body != null) {
                 this.body.add(body);
@@ -154,6 +190,8 @@ public class ResetActivity extends AppCompatActivity {
                     result = new JSONObject(builder.toString());
                     result.put("success", false);
                 }
+
+                Log.i("doinbackground.reset", result.toString());
             }
             catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -167,7 +205,7 @@ public class ResetActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
             super.onPostExecute(jsonObject);
-            successReset(jsonObject);
+            postReset(jsonObject);
         }
     }
 }
