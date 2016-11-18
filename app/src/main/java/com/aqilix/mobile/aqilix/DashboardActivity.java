@@ -4,23 +4,22 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import java.util.concurrent.ExecutionException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.aqilix.mobile.aqilix.database.PairDataTable;
 import com.aqilix.mobile.aqilix.library.MainFunction;
 import com.aqilix.mobile.aqilix.library.PostTask;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.concurrent.ExecutionException;
-
 public class DashboardActivity extends AppCompatActivity {
 
     protected PairDataTable pairTable;
+
     ProgressDialog progress;
 
     @Override
@@ -28,11 +27,9 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         pairTable = new PairDataTable(getApplication());
-        String content = getIntent().getStringExtra("content");
+        String content  = getIntent().getStringExtra("content");
         TextView sample = (TextView) findViewById(R.id.sampleContent);
         sample.setText(content);
-        if (content != null && !content.equals("")) {
-        }
 
         progress = new ProgressDialog(DashboardActivity.this);
         progress.setMessage(getString(R.string.progress_message));
@@ -57,26 +54,38 @@ public class DashboardActivity extends AppCompatActivity {
                 doLogout();
                 break;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Show My Profile Activity
+     */
     private void showMyProfile() {
         String uuid = pairTable.getValueOfKey("uuid");
         if (uuid != null) {
+            Log.i("showMyProfile", uuid);
             Intent profile = new Intent(getApplication(), ProfileActivity.class);
             startActivity(profile);
         }
     }
 
+    /**
+     * Dismiss Progress
+     */
     private void dismissProgress() {
         if (progress.isShowing()) {
             progress.dismiss();
         }
     }
 
+    /**
+     * Logout
+     */
     private void doLogout() {
         try {
             String url = getString(R.string.host) + "/oauth/revoke";
+            // TODO: 11/18/16 Optimize MainFunction
             String token = MainFunction.getToken(getApplication());
             PostTask post = new PostTask(url);
             post.setHeader("Content-Type", "application/x-www-form-urlencoded")
@@ -94,10 +103,12 @@ public class DashboardActivity extends AppCompatActivity {
                 login.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(login);
                 finish();
-            }
-            else {
+                Log.i("logout", "success");
+            } else {
                 message = message + ", " + result.getString("detail");
+                Log.e("logout", result.getString("detail"));
             }
+
             Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show();
         }
         catch (InterruptedException | ExecutionException | JSONException e) {
