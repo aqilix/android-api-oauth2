@@ -1,0 +1,17 @@
+#
+# generated on 2016/11/19 11:49:05
+#
+# --table-start--
+dataClass=com.aqilix.mobile.aqilix.orm.model.PairData
+tableName=pair_data
+# --table-fields-start--
+# --field-start--
+fieldName=key
+id=true
+# --field-end--
+# --field-start--
+fieldName=value
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
