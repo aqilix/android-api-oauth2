@@ -23,7 +23,7 @@ public class PairDataOpenDB extends OrmLiteSqliteOpenHelper{
     /**
      * The data access object used to interact with the Sqlite database to do C.R.U.D operations.
      */
-    private Dao<PairData, Long> pairDataDao;
+    private Dao<PairData, String> pairDataDao;
 
     public PairDataOpenDB(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION,
@@ -66,7 +66,7 @@ public class PairDataOpenDB extends OrmLiteSqliteOpenHelper{
     * @return
     * @throws SQLException
     */
-    public Dao<PairData, Long> getDao() throws SQLException {
+    public Dao<PairData, String> getDao() throws SQLException {
         if(pairDataDao == null) {
             pairDataDao = getDao(PairData.class);
         }
@@ -74,4 +74,14 @@ public class PairDataOpenDB extends OrmLiteSqliteOpenHelper{
         return pairDataDao;
     }
 
+    public String getValue(String key) {
+        try {
+            Dao<PairData, String> pairDataDao = getDao(PairData.class);
+            return pairDataDao.queryForId(key).getValue();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
