@@ -152,4 +152,16 @@ public class PairDataOpenDB extends OrmLiteSqliteOpenHelper{
             e.printStackTrace();
         }
     }
+
+    /**
+     * Drop current table
+     */
+    public void drop() {
+        try {
+            TableUtils.dropTable(getConnectionSource(), PairData.class, false);
+            Log.i("dropPairData", "dropped");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
