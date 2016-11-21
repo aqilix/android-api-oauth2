@@ -1,15 +1,24 @@
 package com.aqilix.mobile.aqilix.orm.helper;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.aqilix.mobile.aqilix.orm.model.PairData;
+import com.aqilix.mobile.aqilix.R;
+
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import com.aqilix.mobile.aqilix.orm.model.PairData;
-import com.aqilix.mobile.aqilix.R;
-
-import java.sql.SQLException;
 
 /**
  * Created by dolly on 11/19/16.
@@ -74,6 +83,12 @@ public class PairDataOpenDB extends OrmLiteSqliteOpenHelper{
         return pairDataDao;
     }
 
+    /**
+     * Get value from a key
+     *
+     * @param key
+     * @return value from key or null
+     */
     public String getValue(String key) {
         try {
             Dao<PairData, String> pairDataDao = getDao(PairData.class);
@@ -83,5 +98,58 @@ public class PairDataOpenDB extends OrmLiteSqliteOpenHelper{
         }
 
         return null;
+    }
+
+    /**
+     * Populate Login Data
+     *
+     * @param jsonObject
+     */
+    public void populateLoginData(JSONObject jsonObject) {
+        List<PairData> pairDataCollection = new ArrayList<>();
+        Iterator<String> keys = jsonObject.keys();
+        // compose Collection
+        while (keys.hasNext()) {
+            String key   = keys.next();
+            String value = null;
+            try {
+                value = jsonObject.getString(key);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            PairData pairData = new PairData(key, value);
+            pairDataCollection.add(pairData);
+        }
+
+        // add insert time to json object
+        PairData pairData = new PairData("insert_time", String.valueOf(System.currentTimeMillis()));
+        try {
+            jsonObject.put(pairData.getKey(), pairData.getValue());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        pairDataCollection.add(pairData);
+        try {
+            this.getDao().create(pairDataCollection);
+            Log.i("populateLoginData", jsonObject.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Insert PairData
+     *
+     * @param pairData
+     */
+    public void insert(PairData pairData) {
+        try {
+            getDao().create(pairData);
+            Log.i("insertPairData", pairData.toString());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
