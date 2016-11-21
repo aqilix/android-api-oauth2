@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,15 +21,14 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
-import java.sql.SQLException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
+
 import com.aqilix.mobile.aqilix.library.GetTask;
 import com.aqilix.mobile.aqilix.orm.model.PairData;
 import com.aqilix.mobile.aqilix.orm.helper.PairDataOpenDB;
@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private ProgressDialog progress;
 
-    private Dao<PairData, Long> pairDataDao;
+    private PairDataOpenDB pairDataOpenDBHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +48,8 @@ public class LoginActivity extends AppCompatActivity {
         progress.setCancelable(false);
         progress.setInverseBackgroundForced(false);
 
-        // set PairData DAO
-        PairDataOpenDB pairDataOpenDBHelper = OpenHelperManager.getHelper(this, PairDataOpenDB.class);
-        try {
-            this.setPairDataDao(pairDataOpenDBHelper.getDao());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
+        // set PairData DB Helper
+        pairDataOpenDBHelper = OpenHelperManager.getHelper(this, PairDataOpenDB.class);
         final EditText email = (EditText) findViewById(R.id.editTextEmail);
         final EditText password = (EditText) findViewById(R.id.editTextPassword);
         TextView reset = (TextView)findViewById(R.id.resetPassword);
@@ -97,14 +91,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public Dao<PairData, Long> getPairDataDao() {
-        return pairDataDao;
-    }
-
-    public void setPairDataDao(Dao<PairData, Long> pairDataDao) {
-        this.pairDataDao = pairDataDao;
-    }
-
     /**
      * Do Login
      * @param email
@@ -140,46 +126,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Populate Database By Using JsonObject
-     *
-     * @param jsonResponse
-     * @SuppressWarnings("unchecked")
-     */
-    protected void populateLoginData(JSONObject jsonResponse) {
-        Iterator<String> keys   = jsonResponse.keys();
-        List pairDataCollection = new ArrayList<>();
-        // compose Collection
-        while (keys.hasNext()) {
-            String key   = keys.next();
-            String value = null;
-            try {
-                value = jsonResponse.getString(key);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            PairData pairData = new PairData(key, value);
-            pairDataCollection.add(pairData);
-        }
-
-        // add insert time
-        PairData pairData = new PairData("insert_time", String.valueOf(System.currentTimeMillis()));
-        try {
-            jsonResponse.put(pairData.getKey(), pairData.getValue());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        pairDataCollection.add(pairData);
-        try {
-            this.getPairDataDao().create(pairDataCollection);
-            Log.i("populateLoginData", jsonResponse.toString());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Tasks after login success
      *
      * @param jsonResponse
@@ -188,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
         try {
             Boolean isSuccess = jsonResponse.getBoolean("success");
             if (isSuccess) {
-                this.populateLoginData(jsonResponse);
+                pairDataOpenDBHelper.populateLoginData(jsonResponse);
                 // retrieve uuid from /api/me
                 String token = jsonResponse.getString("access_token");
                 String url   = getString(R.string.host) + "/api/me";
@@ -203,12 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                     String uuid = meResourceResponse.getString("uuid");
                     // insert uuid to pair data
                     PairData uuidPairData = new PairData("uuid", uuid);
-                    try {
-                        this.getPairDataDao().create(uuidPairData);
-                        Log.i("successLogin.pairData", uuidPairData.toString());
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    pairDataOpenDBHelper.insert(uuidPairData);
 
                     // stop progress
                     dismissProgress();
