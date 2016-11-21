@@ -1,6 +1,7 @@
 package com.aqilix.mobile.aqilix;
 
 import java.util.concurrent.ExecutionException;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,12 +11,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.j256.ormlite.android.apptools.OpenHelperManager;
+
 import com.aqilix.mobile.aqilix.library.MainFunction;
 import com.aqilix.mobile.aqilix.library.PostTask;
 import com.aqilix.mobile.aqilix.orm.helper.PairDataOpenDB;
+
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -100,7 +104,8 @@ public class DashboardActivity extends AppCompatActivity {
             String message = "Logout Failed";
             if (result.getBoolean("success")) {
                 message = "Logout success";
-                MainFunction.clearAll(getApplication());
+//                MainFunction.clearAll(getApplication());
+                pairDataOpenDBHelper.drop();
                 Intent login = new Intent(getApplication(), LoginActivity.class);
                 login.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(login);
