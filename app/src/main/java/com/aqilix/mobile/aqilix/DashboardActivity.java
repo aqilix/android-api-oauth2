@@ -1,5 +1,6 @@
 package com.aqilix.mobile.aqilix;
 
+import java.util.concurrent.ExecutionException;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,28 +10,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.util.concurrent.ExecutionException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.aqilix.mobile.aqilix.database.PairDataTable;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.aqilix.mobile.aqilix.library.MainFunction;
 import com.aqilix.mobile.aqilix.library.PostTask;
+import com.aqilix.mobile.aqilix.orm.helper.PairDataOpenDB;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    protected PairDataTable pairTable;
-
     ProgressDialog progress;
+
+    private PairDataOpenDB pairDataOpenDBHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        pairTable = new PairDataTable(getApplication());
         String content  = getIntent().getStringExtra("content");
         TextView sample = (TextView) findViewById(R.id.sampleContent);
         sample.setText(content);
 
+        // set PairData DB Helper
+        pairDataOpenDBHelper = OpenHelperManager.getHelper(this, PairDataOpenDB.class);
         progress = new ProgressDialog(DashboardActivity.this);
         progress.setMessage(getString(R.string.progress_message));
         progress.setCancelable(false);
@@ -62,7 +64,7 @@ public class DashboardActivity extends AppCompatActivity {
      * Show My Profile Activity
      */
     private void showMyProfile() {
-        String uuid = pairTable.getValueOfKey("uuid");
+        String uuid = pairDataOpenDBHelper.getValue("uuid");
         if (uuid != null) {
             Log.i("showMyProfile", uuid);
             Intent profile = new Intent(getApplication(), ProfileActivity.class);
